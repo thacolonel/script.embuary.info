@@ -1,4 +1,4 @@
 
-*.pyo
+resources/lib/__pycache__/
 
-*.pyc
+resources/__pycache__/
