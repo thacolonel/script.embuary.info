@@ -312,6 +312,10 @@ def tmdb_handle_person(item):
     list_item.setProperty('biography', tmdb_fallback_info(item, 'biography'))
     list_item.setProperty('place_of_birth', item.get('place_of_birth').strip() if item.get('place_of_birth') else '')
     list_item.setProperty('known_for_department', item.get('known_for_department', ''))
+    if item.get('known_for_department', '') == 'Acting':
+        list_item.setProperty('other_crew', 'Crew')
+    else:
+        list_item.setProperty('other_crew', 'Other Crew')
     list_item.setProperty('gender', gender)
     list_item.setProperty('id', str(item.get('id', '')))
     list_item.setProperty('call', 'person')

@@ -46,12 +46,17 @@ class TMDBPersons(object):
             self.local_movie_count = 0
             self.local_tv_count = 0
             self.all_credits = list()
-
+            self.depart = self.details['known_for_department']
             self.result['movies'] = self.get_movie_list()
             self.result['tvshows'] = self.get_tvshow_list()
             self.result['combined'] = self.get_combined_list()
             self.result['person'] = self.get_person_details()
             self.result['images'] = self.get_person_images()
+            # Added
+            self.result['known_for'] = self.get_known_for_list()
+            self.result['crew'] = self.get_crew_list()
+            self.result['other_crew'] =  self.get_crew_list()
+
 
     def __getitem__(self,key):
         return self.result.get(key, '')
@@ -120,6 +125,72 @@ class TMDBPersons(object):
                 self.all_credits.append(item)
 
         return li
+
+    # Added to get movies that person was a crew member
+
+    def get_crew_list(self):
+        movies = self.details['movie_credits']['crew']
+        movies = sort_dict(movies, 'release_date', True)
+        li = list()
+        duplicate_handler = list()
+
+        for item in movies:
+            skip_movie = False
+            job = item.get('job')
+            department = item.get('department')
+
+            ''' Filter to only get real jobs
+            '''
+            if FILTER_MOVIES:
+                if job == 'Thanks':
+                    skip_movie = True
+                if department == self.depart:
+                    skip_movie = True
+                    # DIALOG.notification('GRR', f'Skipping movie: {item.get("title")}')
+
+
+            ''' Filter to hide in production or rumored future movies
+            '''
+            if FILTER_UPCOMING:
+                release_date = item.get('release_date', '')
+                if release_date in ['', '1900-01-01']:
+                    skip_movie = True
+
+            if not skip_movie and item['id'] not in duplicate_handler:
+                list_item, is_local = tmdb_handle_movie(item, self.local_movies)
+                list_item.setProperty('job', str(job))
+                li.append(list_item)
+                duplicate_handler.append(item['id'])
+
+                if is_local:
+                    self.local_movie_count += 1
+
+        return li
+
+    # Added to get movies that person was a crew member
+
+    def get_known_for_list(self):
+        duplicate_handler = list()
+        li = list()
+        if self.depart != 'Acting':
+            movies = self.details['movie_credits']['crew']
+            movies = sort_dict(movies, 'release_date', True)
+            for movie in movies:
+                if self.depart == movie['department']:
+                    job = movie.get('job')
+                    list_item, is_local = tmdb_handle_movie(movie, self.local_movies)
+                    list_item.setProperty('job', str(job))
+                    li.append(list_item)
+                    duplicate_handler.append(movie['id'])
+
+                    if is_local:
+                        self.local_movie_count += 1
+
+        else:
+            li = self.get_movie_list()
+
+        return li
+
 
     def get_tvshow_list(self):
         tvshows = self.details['tv_credits']['cast']

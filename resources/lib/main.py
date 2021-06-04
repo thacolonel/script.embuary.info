@@ -187,6 +187,8 @@ class TheMovieDB(object):
         dialog = DialogPerson('script-embuary-person.xml', ADDON_PATH, 'default', '1080i',
                               person=data['person'],
                               movies=data['movies'],
+                              known_for=data['known_for'],
+                              crew=data['crew'],
                               tvshows=data['tvshows'],
                               combined=data['combined'],
                               images=data['images'],
@@ -294,6 +296,8 @@ class DialogPerson(xbmcgui.WindowXMLDialog):
         self.tmdb_id = kwargs['tmdb_id']
         self.person = kwargs['person']
         self.movies = kwargs['movies']
+        self.known_for =kwargs['known_for']
+        self.crew = kwargs['crew']
         self.tvshows = kwargs['tvshows']
         self.combined = kwargs['combined']
         self.images = kwargs['images']
@@ -314,7 +318,7 @@ class DialogPerson(xbmcgui.WindowXMLDialog):
         self.first_load = False
 
         index = 10051
-        li = [self.person, self.movies, self.tvshows, self.images, self.combined]
+        li = [self.person, self.movies, self.tvshows, self.images, self.combined, self.crew, self.known_for]
 
         for items in li:
             try:
