@@ -205,7 +205,7 @@ class TheMovieDB(object):
         dialog = DialogVideo('script-embuary-video.xml', ADDON_PATH, 'default', '1080i',
                              details=data['details'],
                              cast=data['cast'],
-                             crew=data['movie_crew'],
+                             crew=data['crew'],
                              similar=data['similar'],
                              youtube=data['youtube'],
                              backdrops=data['backdrops'],
