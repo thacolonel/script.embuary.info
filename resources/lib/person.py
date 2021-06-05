@@ -54,8 +54,8 @@ class TMDBPersons(object):
             self.result['images'] = self.get_person_images()
             # Added
             self.result['known_for'] = self.get_known_for_list()
-            self.result['crew'] = self.get_crew_list()
-            self.result['other_crew'] =  self.get_crew_list()
+            self.result['movie_crew'] = self.get_movie_crew_list()
+            self.result['tv_crew'] = self.get_tv_crew_list()
 
 
     def __getitem__(self,key):
@@ -128,7 +128,7 @@ class TMDBPersons(object):
 
     # Added to get movies that person was a crew member
 
-    def get_crew_list(self):
+    def get_movie_crew_list(self):
         movies = self.details['movie_credits']['crew']
         movies = sort_dict(movies, 'release_date', True)
         li = list()
@@ -176,12 +176,13 @@ class TMDBPersons(object):
             movies = self.details['movie_credits']['crew']
             movies = sort_dict(movies, 'release_date', True)
             for movie in movies:
-                if self.depart == movie['department']:
+                if self.depart == movie['department'] and movie['id'] not in duplicate_handler:
                     job = movie.get('job')
                     list_item, is_local = tmdb_handle_movie(movie, self.local_movies)
                     list_item.setProperty('job', str(job))
                     li.append(list_item)
                     duplicate_handler.append(movie['id'])
+                    movie['type'] = 'movie'
 
                     if is_local:
                         self.local_movie_count += 1
@@ -221,6 +222,51 @@ class TMDBPersons(object):
 
             if not skip_show and item['id'] not in duplicate_handler:
                 list_item, is_local = tmdb_handle_tvshow(item, self.local_shows)
+                li.append(list_item)
+                duplicate_handler.append(item['id'])
+                item['type'] = 'tvshow'
+                item['release_date'] = item['first_air_date']
+
+                if is_local:
+                    self.local_tv_count += 1
+
+                self.all_credits.append(item)
+
+        return li
+
+
+    def get_tv_crew_list(self):
+        tvshows = self.details['tv_credits']['crew']
+        tvshows = sort_dict(tvshows, 'first_air_date', True)
+        li = list()
+        duplicate_handler = list()
+
+        for item in tvshows:
+            skip_show = False
+            job = item.get('job')
+            department = item.get('department')
+
+            ''' Filter to only show real TV series and to skip talk, reality or news shows
+            '''
+            if FILTER_SHOWS:
+                if not item['genre_ids']:
+                    skip_show = True
+                else:
+                    for genre in item['genre_ids']:
+                        if genre in FILTER_SHOWS_BLACKLIST:
+                            skip_show = True
+                            break
+
+            ''' Filter to hide in production or rumored future shows
+            '''
+            if FILTER_UPCOMING:
+                diff = date_delta(item.get('first_air_date', '2900-01-01'))
+                if diff.days > FILTER_DAYDELTA:
+                    skip_show = True
+
+            if not skip_show and item['id'] not in duplicate_handler:
+                list_item, is_local = tmdb_handle_tvshow(item, self.local_shows)
+                list_item.setProperty('job', str(job))
                 li.append(list_item)
                 duplicate_handler.append(item['id'])
                 item['type'] = 'tvshow'

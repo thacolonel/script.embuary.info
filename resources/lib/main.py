@@ -188,7 +188,8 @@ class TheMovieDB(object):
                               person=data['person'],
                               movies=data['movies'],
                               known_for=data['known_for'],
-                              crew=data['crew'],
+                              movie_crew=data['movie_crew'],
+                              tv_crew=data['tv_crew'],
                               tvshows=data['tvshows'],
                               combined=data['combined'],
                               images=data['images'],
@@ -204,7 +205,7 @@ class TheMovieDB(object):
         dialog = DialogVideo('script-embuary-video.xml', ADDON_PATH, 'default', '1080i',
                              details=data['details'],
                              cast=data['cast'],
-                             crew=data['crew'],
+                             crew=data['movie_crew'],
                              similar=data['similar'],
                              youtube=data['youtube'],
                              backdrops=data['backdrops'],
@@ -297,7 +298,8 @@ class DialogPerson(xbmcgui.WindowXMLDialog):
         self.person = kwargs['person']
         self.movies = kwargs['movies']
         self.known_for =kwargs['known_for']
-        self.crew = kwargs['crew']
+        self.movie_crew = kwargs['movie_crew']
+        self.tv_crew = kwargs['tv_crew']
         self.tvshows = kwargs['tvshows']
         self.combined = kwargs['combined']
         self.images = kwargs['images']
@@ -318,7 +320,7 @@ class DialogPerson(xbmcgui.WindowXMLDialog):
         self.first_load = False
 
         index = 10051
-        li = [self.person, self.movies, self.tvshows, self.images, self.combined, self.crew, self.known_for]
+        li = [self.person, self.movies, self.tvshows, self.images, self.combined, self.movie_crew, self.known_for, self.tv_crew]
 
         for items in li:
             try:
