@@ -55,6 +55,7 @@ class TMDBVideos(object):
             self.result['crew'] = self.get_crew()
             self.result['collection'] = self.get_collection()
             self.result['similar'] = self.get_similar()
+            self.result['directed_by'] = self.get_directed_by()
             self.result['youtube'] = self.get_yt_videos()
             self.result['backdrops'], self.result['posters'] = self.get_images()
             self.result['seasons'] = self.get_seasons()
@@ -70,7 +71,6 @@ class TMDBVideos(object):
             list_item, is_local = tmdb_handle_movie(self.details, self.local_movies,full_info=True)
         elif self.tvshow:
             list_item, is_local = tmdb_handle_tvshow(self.details, self.local_shows,full_info=True)
-
         li.append(list_item)
         return li
 
@@ -293,5 +293,26 @@ class TMDBVideos(object):
                 list_item = tmdb_handle_yt_videos(item)
                 if not list_item == 404:
                     li.append(list_item)
+
+        return li
+
+    def get_directed_by(self):
+        duplicate_handler = list()
+        li = list()
+        for item in self.crew:
+            if item['job'] == 'Director':
+                director_id = item['id']
+                details = tmdb_query(action='person', call=director_id,
+                                     params={'append_to_response': 'movie_credits'},
+                                     show_error=True)
+                movies = details['movie_credits']['crew']
+                movies = sort_dict(movies, 'release_date', True)
+                for movie in movies:
+                    job = movie.get('job')
+                    if job == 'Director' and movie['id'] not in duplicate_handler and self.tmdb_id != movie['id']:
+                        list_item, is_local = tmdb_handle_movie(movie, self.local_movies)
+                        list_item.setProperty('job', str(job))
+                        li.append(list_item)
+                        duplicate_handler.append(movie['id'])
 
         return li

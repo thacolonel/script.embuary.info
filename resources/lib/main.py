@@ -207,6 +207,7 @@ class TheMovieDB(object):
                              cast=data['cast'],
                              crew=data['crew'],
                              similar=data['similar'],
+                             directed_by=data['directed_by'],
                              youtube=data['youtube'],
                              backdrops=data['backdrops'],
                              posters=data['posters'],
@@ -382,6 +383,7 @@ class DialogVideo(xbmcgui.WindowXMLDialog):
         self.cast = kwargs['cast']
         self.crew = kwargs['crew']
         self.similar = kwargs['similar']
+        self.directed_by = kwargs['directed_by']
         self.youtube = kwargs['youtube']
         self.backdrops = kwargs['backdrops']
         self.posters = kwargs['posters']
@@ -404,7 +406,7 @@ class DialogVideo(xbmcgui.WindowXMLDialog):
         self.first_load = False
 
         index = 10051
-        li = [self.details, self.cast, self.similar, self.youtube, self.backdrops, self.crew, self.collection, self.seasons, self.posters]
+        li = [self.details, self.cast, self.similar, self.youtube, self.backdrops, self.crew, self.collection, self.seasons, self.posters, self.directed_by]
 
         for items in li:
             try:
